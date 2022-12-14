@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "nodemon src/server.ts --exec \"npx babel-node -x .ts --require ./config\"",
-    "test": "jest --setupFiles ./test/config.ts"
+    "test": "jest --detectOpenHandles --setupFiles ./test/config.ts"
   },
   "browserslist": [
     "maintained node versions"

@@ -2,36 +2,41 @@ import http from 'http';
 import WebSocket from 'ws';
 import UptimeServer from '../src/webSocket';
 
-let webServer: any;
-let uptimeServer: any;
+function startServer(port : number) {
+  const webServer = http.createServer();
+  new UptimeServer(webServer, '/api/v1');
+  return new Promise((resolve, ) => {
+    webServer.listen(port, () => resolve(webServer));
+  });
+}
 
-beforeAll((done) => {
-  webServer = http.createServer();
-  uptimeServer = new UptimeServer(webServer, '/api/v1');
-  // Use separate port for testing
-  webServer.listen(3001, () => done());
-});
- 
-afterAll((done) => {
-  if (!uptimeServer) return done(new Error());
-  uptimeServer.close();
+function waitForSocketState(socket : WebSocket, state : any) {
+  return new Promise<void>(function (resolve) {
+    setTimeout(function () {
+      if (socket.readyState === state) {
+        resolve();
+      } else {
+        waitForSocketState(socket, state).then(resolve);
+      }
+    }, 5);
+  });
+}
 
-  if (!webServer) return done(new Error());
-  webServer.close(() => done());
-});
+describe('testing WebSocket', () => {
+  let server : any;
+  beforeAll(async () => {
+    server = await startServer(3001);
+  });
+  afterAll(() => {
+    server.close();
+  });
 
-
-describe('testing WebSocket functionality', () => {
   test('Connection opens successfully', (done) => {
     const connection = new WebSocket('ws://localhost:3001/api/v1/uptime');
  
     connection.on('open', () => {
       connection.close();
       done();
-    });
- 
-    connection.on('error', (error) => {
-      done(error);
     });
   });
 });
