@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "jsx": "react",
+    "strict": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "react-simplified": ["@types/react-simplified.d.ts"]
+    }
+  }
+}
