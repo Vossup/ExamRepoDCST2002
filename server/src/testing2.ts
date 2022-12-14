@@ -1,11 +1,11 @@
-function divide(dividend: number, divisor: number) {
-    return new Promise<number>((resolve, reject) => {
-      if (divisor == 0) return reject(new Error('Cannot divide by zero'));
-      if (dividend == 0) return resolve(0);
+function getAnswer() {
+  return (
+    new Promise<number>((resolve) => {
       setTimeout(() => {
-        resolve(dividend / divisor);
+        resolve(42);
       }, 1000);
-    });
-  }
+    })
+  );
+}
 
-export { divide }
+export { getAnswer }
