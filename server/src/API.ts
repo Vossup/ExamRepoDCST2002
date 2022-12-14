@@ -1,6 +1,6 @@
 import express from 'express';
 
-//test can be done with postman towards path localhost:3000/api/v2/<path>
+//test can be done with postman towards path localhost:3000/api/v1/<path>
 
 const router = express.Router();
 
@@ -12,6 +12,13 @@ router.get('/tasks', (_request, response) => {
 });
 
 router.get('/tasks/:id', (request, response) => {
+  let id = parseInt(request.params.id);
+  let task = tasks.find((task) => task.id === id);
+  if (task) {
+    response.send(task);
+  } else {
+    response.status(404).send();
+  }
 });
 
 router.post('/tasks', (request, response) => {
