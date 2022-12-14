@@ -10,18 +10,6 @@ function startServer(port : number) {
   });
 }
 
-function waitForSocketState(socket : WebSocket, state : any) {
-  return new Promise<void>(function (resolve) {
-    setTimeout(function () {
-      if (socket.readyState === state) {
-        resolve();
-      } else {
-        waitForSocketState(socket, state).then(resolve);
-      }
-    }, 5);
-  });
-}
-
 describe('testing WebSocket', () => {
   let server : any;
   beforeAll(async () => {
