@@ -1,4 +1,4 @@
-import { divide } from '../src/testing';
+import { divide } from '../src/testing2';
 
 describe('testing divide function', () => {
   test('divide two numbers != 0', () => {
