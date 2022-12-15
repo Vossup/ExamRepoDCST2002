@@ -1,30 +1,77 @@
 import express from 'express';
 
-//test can be done with postman towards path localhost:3000/api/v1/<path>
-
+// test can be done with postman towards path localhost:3000/api/v1/<path>
+// due to base path being set to /api/v1 in server.ts
 const router = express.Router();
 
-let tasks = [ { id: 1, name: 'Task 1' }, { id: 2, name: 'Task 2' }, { id: 3, name: 'Task 3' } ];
+// We assume we have access to a database service file called BookService with the following methods:
+// getBook():
+// deleteBook(id: number):
+// createBook(book: Book)
 
-router.get('/tasks', (_request, response) => {
-  //send back a list of tasks
-  response.send(tasks);
-});
-
-router.get('/tasks/:id', (request, response) => {
-  let id = parseInt(request.params.id);
-  let task = tasks.find((task) => task.id === id);
-  if (task) {
-    response.send(task);
-  } else {
-    response.status(404).send();
+// Book Type and BookService class would be something close to the following, but exact implementation is deffered as an abstrtaction for the api
+// following lines are just for illustration purposes and clarity for me while working with the code
+// to me it would make sense to expand a little bit on what the task originally asked for and thus i added both the get book and get books methods
+type Book = {
+  id: number;
+  title: string;
+}
+class BookService{
+  static getBooks(): Promise<Book[]>{
+    return Promise.resolve([]);
   }
+
+  static getBook(id: number): Promise<Book>{
+    return Promise.resolve({id: 0, title: ''});
+  }
+
+  static deleteBook(id: number): Promise<void>{
+    return Promise.resolve();
+  }
+
+  static createBook(book: Book): Promise<number>{
+    return Promise.resolve(1); // id/insert id for the created book
+  }
+
+}
+
+// /api/v1/books for getting all books where the book list can be empty
+router.get('/books', (_request, response) => {
+  BookService.getBooks()
+    .then((books) => {response.send(books);})
+    .catch((error) => {response.status});
 });
 
-router.post('/tasks', (request, response) => {
+// .api/v1/books/:id for getting a single book based on id, error handeling would be done in combination with the service class in the case where the book is not found.
+router.get('/books/:id', (request, response) => {
+  let id = Number(request.params.id);
+  BookService.getBook(id)
+    .then((book) => {response.send(book);})
+    .catch((error) => {response.status});
 });
 
-router.delete('/tasks/:id', (request, response) => {
+// /api/v1/books for creating a new book
+router.post('/books', (request, response) => {
+  let data = request.body;
+  if(!data.title){
+    response.status(400).send('Missing title');
+  }
+  if(!data.id){
+    response.status(400).send('Missing id');
+  }
+  BookService.createBook(data)
+    .then((id) => {response.status(200).send(id)})
+    .catch((error) => {response.status(500).send('Something went wrong');
+  });
 });
 
-export default router;
+router.delete('/books/:id', (request, response) => {
+  let id = Number(request.params.id);
+  BookService.deleteBook(id).then(() => {
+    response.status(200).send();
+  }).catch((error) => {
+    response.status(500).send('Something went wrong');
+  });
+});
+
+export { router as apiRouter, BookService, Book};

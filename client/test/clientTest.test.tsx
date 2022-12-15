@@ -1,49 +1,42 @@
 import * as React from 'react';
-import { /*Alert,*/ Count } from '../src/clientTest';
+import { Exam } from '../src/clientTest';
 import { shallow } from 'enzyme';
 
-// describe('Alert tests', () => {
-//   test.skip('No alerts initially', () => {
-//     const wrapper = shallow(<Alert />);
+// Tests the Exam component wiht 100% coverage and 100% branch coverage using shallow rendering
+describe('Exam tests', () => {
+  test('Exam draws correctly wihtout input', () => {
+    const wrapper = shallow(<Exam />);
 
-//     expect(wrapper.matchesElement(<div></div>)).toEqual(true);
-//   });
-
-//   test.skip('Show alert message', (done) => {
-//     const wrapper = shallow(<Alert />);
-
-//     Alert.danger('test');
-
-//     // Wait for events to complete
-//     setTimeout(() => {
-//       expect(
-//         wrapper.matchesElement(
-//           <div>
-//             <div>
-//               test
-//               <button />
-//             </div>
-//           </div>
-//         )
-//       ).toEqual(true);
-
-//       done();
-//     });
-//   });
-// });
-
-describe('Count tests', () => {
-  test('Initial count is 0', () => {
-    const wrapper = shallow(<Count />);
-
-    expect(wrapper.containsMatchingElement(<button>{0}</button>)).toEqual(true);
+    expect(wrapper.matchesElement(
+    <>
+      <div>
+        Hva er svaret?
+        <input
+        />
+      </div>
+      <div>
+        Svaret er feil
+      </div>
+    </>
+    )).toEqual(true);
   });
 
-  test('Increment count', () => {
-    const wrapper = shallow(<Count />);
+  test('Exam draws correctly with input', () => {
+    const wrapper = shallow(<Exam />);
 
-    wrapper.find('button').simulate('click');
+    wrapper.find('input').simulate('change', {currentTarget: {value: '42'}});
 
-    expect(wrapper.containsMatchingElement(<button>{1}</button>)).toEqual(true);
+    expect(wrapper.matchesElement(
+    <>
+      <div>
+        Hva er svaret?
+        <input
+        />
+      </div>
+      <div>
+        Svaret er riktig
+      </div>
+    </>
+    )).toEqual(true);
   });
 });
