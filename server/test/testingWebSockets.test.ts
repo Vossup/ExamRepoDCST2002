@@ -84,11 +84,14 @@ describe('testing WebSocket', () => {
 
   // Test of the newStudent action and getAll action in combination to make sure results are as expected
   test('Getting all connected students after taking new student attendance', async() => {
-
+    // Create two connections to the server and wait until they are both open
     const connection1 = new WebSocket('ws://localhost:3001/api/v1/classAttendance');
     const connection2 = new WebSocket('ws://localhost:3001/api/v1/classAttendance');
 
     await waitForSocketState(connection1, WebSocket.OPEN);
+    await waitForSocketState(connection2, WebSocket.OPEN);
+
+    // Add a student through connection 1 and get all students through connection 2
     let messageDataConnection1 : any = {action : 'newStudent', name : 'John'};
     let responseData : any;
     let expectedResponse1 : any = {newStudent : 'John'};
@@ -110,9 +113,73 @@ describe('testing WebSocket', () => {
       connection2.close();
     });
 
+    // Wait for both connections to close and then check if the results are as expected
     await waitForSocketState(connection1, WebSocket.CLOSED);
     await waitForSocketState(connection2, WebSocket.CLOSED);
     expect(responseData).toEqual(expectedResponse1);
     expect(studentsConnectedForConnection2).toEqual(expectedStudentsConnectedForConnection2);
   });
+
+  // Test of the removeStudent section after closing the connection
+  test('Checking that removing student after closing connection works', async() => {
+    const connection1 = new WebSocket('ws://localhost:3001/api/v1/classAttendance');
+    const connection2 = new WebSocket('ws://localhost:3001/api/v1/classAttendance');
+    const connection3 = new WebSocket('ws://localhost:3001/api/v1/classAttendance');
+
+    await waitForSocketState(connection1, WebSocket.OPEN);
+    await waitForSocketState(connection2, WebSocket.OPEN);
+    await waitForSocketState(connection3, WebSocket.OPEN);
+
+    // Add a student through connection 1
+    // we expect to see the student added and thus expectedResponse1 should equal responseData1
+    let messageDataConnection1 : any = {action : 'newStudent', name : 'John'};
+    let expectedResponse1 : any = {newStudent : 'John'};
+    let responseData1 : any;
+
+    // Get all students through connection 2 we expect to see the student added through connection 1
+    let messageDataConnection2 : any = {action : 'getAll'};
+    let expectedResponseBeforeClosing2 : any = {students : ['John']};
+    let responseDataBeforeClosing2 : any;
+
+    connection1.send(JSON.stringify(messageDataConnection1));
+
+    connection1.on('message', (message: WebSocket.Data) => {
+      responseData1 = JSON.parse(message.toString());
+    });
+
+    connection2.send(JSON.stringify(messageDataConnection2));
+
+    connection2.on('message', (message: WebSocket.Data) => {
+      responseDataBeforeClosing2 = JSON.parse(message.toString());
+    });
+
+    // we close connection 1 and expect to see the student removed from the list of students
+    connection1.close();
+    connection2.close();
+
+    await waitForSocketState(connection1, WebSocket.CLOSED);
+    await waitForSocketState(connection2, WebSocket.CLOSED);
+
+    // We use connection 3 to get all students and expect to see an empty list of students
+    let expectedResponseAfterClosing3 : any = {students : []};
+    let responseDataAfterClosing3 : any;
+    let messageDataConnection3 : any = {action : 'getAll'};
+
+    connection3.send(JSON.stringify(messageDataConnection3));
+
+    connection3.on('message', (message: WebSocket.Data) => {
+      responseDataAfterClosing3 = JSON.parse(message.toString());
+      connection3.close();
+    });
+
+    // finally we close connection 3 and can inspect results.
+    await waitForSocketState(connection3, WebSocket.CLOSED);
+
+    expect(responseData1).toEqual(expectedResponse1);
+    expect(responseDataBeforeClosing2).toEqual(expectedResponseBeforeClosing2);
+    expect(responseDataAfterClosing3).toEqual(expectedResponseAfterClosing3);
+  });
+  // We should maybe add a test for the error section of the websocket, but unsure how to test for such a case
+  // as it has not been covered much in the curriculum
+  // With the above tests we have 88% coverage of the websocket and 75% of branches.
 });

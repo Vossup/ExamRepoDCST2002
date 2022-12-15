@@ -4,14 +4,17 @@ import express from 'express';
 // due to base path being set to /api/v1 in server.ts
 const router = express.Router();
 
-// We assume we have access to a database service file called BookService with the following methods:
+// We assume we have access to a database service-file called BookService with the following methods:
 // getBook():
 // deleteBook(id: number):
 // createBook(book: Book)
 
-// Book Type and BookService class would be something close to the following, but exact implementation is deffered as an abstrtaction for the api
-// following lines are just for illustration purposes and clarity for me while working with the code
-// to me it would make sense to expand a little bit on what the task originally asked for and thus i added both the get book and get books methods
+// Though not stated in the original task i have also included the functions for updating and getting all books due to this being reasonable to assume.
+// getBooks():
+// updateBook(book: Book)
+
+// Book Type and BookService class would be something close to the following, but i have not included the actual implementation of the methods.
+// the following lines are just for illustration purposes and clarity for me while working with the code
 type Book = {
   id: number;
   title: string;
@@ -33,26 +36,34 @@ class BookService{
     return Promise.resolve(1); // id/insert id for the created book
   }
 
+  static updateBook(book: Book): Promise<void>{
+    return Promise.resolve();
+  }
 }
+
+// Implementation of the API starts here.
 
 // /api/v1/books for getting all books where the book list can be empty
 router.get('/books', (_request, response) => {
   BookService.getBooks()
     .then((books) => {response.send(books);})
-    .catch((error) => {response.status});
+    .catch((error) => {response.status(500).send('Something went wrong');});
 });
 
-// .api/v1/books/:id for getting a single book based on id, error handeling would be done in combination with the service class in the case where the book is not found.
+// .api/v1/books/:id for getting a single book based on id, error handling would be done in combination with the service class in the case where the book is not found.
 router.get('/books/:id', (request, response) => {
   let id = Number(request.params.id);
   BookService.getBook(id)
     .then((book) => {response.send(book);})
-    .catch((error) => {response.status});
+    .catch((error) => {response.status(500).send('Something went wrong');});
 });
 
 // /api/v1/books for creating a new book
 router.post('/books', (request, response) => {
   let data = request.body;
+  if(!data){
+    response.status(400).send('Missing data');
+  }
   if(!data.title){
     response.status(400).send('Missing title');
   }

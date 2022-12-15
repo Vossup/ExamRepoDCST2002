@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Exam } from '../src/clientTest';
 import { shallow } from 'enzyme';
 
-// Tests the Exam component wiht 100% coverage and 100% branch coverage using shallow rendering
+// Tests the Exam component wiht 100% coverage and 100% branch coverage
 describe('Exam tests', () => {
   test('Exam draws correctly wihtout input', () => {
     const wrapper = shallow(<Exam />);

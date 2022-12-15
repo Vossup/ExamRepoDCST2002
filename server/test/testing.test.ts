@@ -14,8 +14,9 @@ beforeAll((done) => {
   webServer = app.listen(3001, () => done());
 });
 
-// Resetsd test data before each test to make sure that the tests are independent of each other
+// Resets test data before each test to make sure that the tests are independent of each other
 // I here assume the database table for the books to be named Books and i stuck to the same id and title for the data corresponding to each book.
+// I also assume pool to be the database connection pool though it is not defined in this code section.
 beforeEach((done) => {
   pool.query('TRUNCATE TABLE Books', (error) => {
     if (error) return done(error);
@@ -38,8 +39,8 @@ describe('POST /books', () => {
   test('should create a new book', (done) => {
     axios.post('/books', { id: 3, title: 'Test book 3' })
       .then((response) => {
-        expect(response.status).toBe(200);
-        expect(response.data).toBe(3);
+        expect(response.status).toEqual(200);
+        expect(response.data).toEqual(3);
         done();
       })
       .catch((error) => done(error));
@@ -47,8 +48,8 @@ describe('POST /books', () => {
   test('should return 400 if missing title', (done) => {
     axios.post('/books', { id: 3 })
       .then((response) => {
-        expect(response.status).toBe(400);
-        expect(response.data).toBe('Missing title');
+        expect(response.status).toEqual(400);
+        expect(response.data).toEqual('Missing title');
         done();
       })
       .catch((error) => done(error));
@@ -56,8 +57,18 @@ describe('POST /books', () => {
   test('should return 400 if missing id', (done) => {
     axios.post('/books', { title: 'Test book 3' })
       .then((response) => {
-        expect(response.status).toBe(400);
-        expect(response.data).toBe('Missing id');
+        expect(response.status).toEqual(400);
+        expect(response.data).toEqual('Missing id');
+        done();
+      })
+      .catch((error) => done(error));
+  });
+
+  test('should return 400 if missing data', (done) => {
+    axios.post('/books')
+      .then((response) => {
+        expect(response.status).toEqual(400);
+        expect(response.data).toEqual('Missing data');
         done();
       })
       .catch((error) => done(error));
